@@ -2152,14 +2152,27 @@ body[data-page="portal"] {
 
 .viewer-drawer.open,
 .viewer-meta-drawer.open {
-  opacity: 1;
+  opacity: 0.65;
   pointer-events: auto;
   transform: scale(1) translateY(0);
 }
 
-/* 拖拽/resize 时禁用过渡 */
+/* 鼠标在悬浮窗悬停，不透明度设置为 80% */
+.viewer-drawer.open:hover,
+.viewer-meta-drawer.open:hover {
+  opacity: 0.8;
+}
+
+/* 鼠标在地图上缩放时，不透明度降低至 30%，透视底层地图纹理 */
+.viewer-drawer.open.map-zooming,
+.viewer-meta-drawer.open.map-zooming {
+  opacity: 0.3 !important;
+}
+
+/* 拖拽/resize 时禁用过渡并保持适度清晰 */
 .viewer-drawer.dragging,
 .viewer-meta-drawer.dragging {
+  opacity: 0.9 !important;
   transition: none !important;
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.70), 0 0 0 2px rgba(var(--accent-rgb), 0.35) !important;
 }
