@@ -160,11 +160,22 @@
         </div>
       </div>
 
-      <!-- Sliding Metadata & Palette Drawer (置于 viewer-container 根层级，全屏通栏磨砂浮层) -->
+      <!-- Floating Metadata Panel · 浮动信息面板 (可拖拽 · 可 resize · Tab/I 键切换) -->
       <aside class="viewer-drawer viewer-meta-drawer" id="viewerMetaDrawer">
-        <div class="drawer-header">
+        <!-- 8向 resize 手柄 -->
+        <div class="drawer-resize-handle nw" data-dir="nw"></div>
+        <div class="drawer-resize-handle n"  data-dir="n"></div>
+        <div class="drawer-resize-handle ne" data-dir="ne"></div>
+        <div class="drawer-resize-handle w"  data-dir="w"></div>
+        <div class="drawer-resize-handle e"  data-dir="e"></div>
+        <div class="drawer-resize-handle sw" data-dir="sw"></div>
+        <div class="drawer-resize-handle s"  data-dir="s"></div>
+        <div class="drawer-resize-handle se" data-dir="se"></div>
+        <div class="drawer-resize-corner-hint"></div>
+        <div class="drawer-header" id="drawerDragHandle">
+          <div class="drawer-drag-grip" aria-hidden="true"><span></span><span></span><span></span></div>
           <h3 class="drawer-title">成果卷宗档案</h3>
-          <button class="drawer-close-btn nav-btn" id="btnCloseDrawer" title="收起面板 (I)" aria-label="收起面板">
+          <button class="drawer-close-btn nav-btn" id="btnCloseDrawer" title="收起面板 (Tab / I)" aria-label="收起面板">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>

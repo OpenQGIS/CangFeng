@@ -2118,53 +2118,77 @@ body[data-page="portal"] {
 
 
 /* =====================================================================
-   Deep Zoom Metadata Drawer (右侧元数据抽屉 · 磨砂玻璃透感设计)
+   Deep Zoom Metadata Drawer → 浮动信息面板 (磨砂玻璃 · 可拖拽 · 可 resize)
    ==================================================================== */
 .viewer-drawer,
 .viewer-meta-drawer {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  width: 360px;
-  max-width: 90vw;
-  background: rgba(15, 18, 24, 0.80);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border-left: 1px solid var(--border-subtle);
-  box-shadow: -12px 0 36px rgba(0, 0, 0, 0.45);
+  top: 80px;
+  right: 20px;
+  width: 320px;
+  height: auto;
+  min-width: 240px;
+  min-height: 200px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 120px);
+  background: rgba(15, 18, 24, 0.82);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.04);
   z-index: 30;
   display: flex;
   flex-direction: column;
-  transform: translateX(100%);
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-              background 0.25s ease,
-              border-color 0.25s ease,
-              box-shadow 0.25s ease;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.94) translateY(-8px);
+  transform-origin: top right;
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
 }
 
 .viewer-drawer.open,
 .viewer-meta-drawer.open {
-  transform: translateX(0) !important;
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1) translateY(0);
 }
 
-/* 浅色模式下：高雅通透的白磨砂玻璃，微透底层画作 */
+/* 拖拽/resize 时禁用过渡 */
+.viewer-drawer.dragging,
+.viewer-meta-drawer.dragging {
+  transition: none !important;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.70), 0 0 0 2px rgba(var(--accent-rgb), 0.35) !important;
+}
+
+/* 浅色模式 */
 :root[data-theme="light"] .viewer-drawer,
 :root[data-theme="light"] .viewer-meta-drawer {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-left: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: -12px 0 36px rgba(15, 20, 28, 0.08);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
 .drawer-header {
-  padding: 18px 20px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: rgba(19, 23, 30, 0.35);
+  cursor: grab;
+  flex-shrink: 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  gap: 8px;
+}
+
+.drawer-header:active {
+  cursor: grabbing;
 }
 
 :root[data-theme="light"] .drawer-header {
@@ -2172,13 +2196,37 @@ body[data-page="portal"] {
   background: rgba(255, 255, 255, 0.45);
 }
 
+/* 拖拽手柄三横线 */
+.drawer-drag-grip {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  opacity: 0.35;
+  flex-shrink: 0;
+  padding: 2px 0;
+  transition: opacity var(--transition-fast);
+}
+.drawer-header:hover .drawer-drag-grip { opacity: 0.65; }
+.drawer-drag-grip span {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
 .drawer-header h3,
 .drawer-header .drawer-title {
-  font-size: 0.90rem;
+  font-size: 0.86rem;
   font-weight: 600;
   letter-spacing: 0.03em;
   color: var(--text-primary);
   margin: 0;
+  flex: 1;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .drawer-close-btn,
@@ -2213,7 +2261,9 @@ body[data-page="portal"] {
 .drawer-content {
   padding: 22px 20px;
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -2268,6 +2318,8 @@ body[data-page="portal"] {
   border-radius: var(--radius-sm);
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 :root[data-theme="light"] .meta-desc-text {
@@ -2390,6 +2442,8 @@ body[data-page="portal"] {
   border-radius: var(--radius-sm);
   white-space: pre-wrap;
   word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 :root[data-theme="light"] .meta-desc {
@@ -2636,3 +2690,58 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
     font-family: sans-serif;
   }
 }
+
+/* =====================================================================
+   浮动信息面板 · 8向 Resize 手柄系统
+   ==================================================================== */
+.drawer-resize-handle {
+  position: absolute;
+  z-index: 10;
+  box-sizing: border-box;
+}
+
+/* 四角 */
+.drawer-resize-handle.nw { top: -4px; left: -4px; width: 14px; height: 14px; cursor: nw-resize; }
+.drawer-resize-handle.ne { top: -4px; right: -4px; width: 14px; height: 14px; cursor: ne-resize; }
+.drawer-resize-handle.sw { bottom: -4px; left: -4px; width: 14px; height: 14px; cursor: sw-resize; }
+.drawer-resize-handle.se { bottom: -4px; right: -4px; width: 14px; height: 14px; cursor: se-resize; }
+
+/* 四边 */
+.drawer-resize-handle.n  { top: -4px; left: 14px; right: 14px; height: 8px; cursor: n-resize; }
+.drawer-resize-handle.s  { bottom: -4px; left: 14px; right: 14px; height: 8px; cursor: s-resize; }
+.drawer-resize-handle.w  { left: -4px; top: 14px; bottom: 14px; width: 8px; cursor: w-resize; }
+.drawer-resize-handle.e  { right: -4px; top: 14px; bottom: 14px; width: 8px; cursor: e-resize; }
+
+/* 右下角 resize 视觉斜纹提示 */
+.drawer-resize-corner-hint {
+  position: absolute;
+  bottom: 7px;
+  right: 7px;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+  opacity: 0.25;
+  transition: opacity var(--transition-fast);
+}
+.viewer-drawer:hover .drawer-resize-corner-hint,
+.viewer-meta-drawer:hover .drawer-resize-corner-hint { opacity: 0.5; }
+.drawer-resize-corner-hint::before,
+.drawer-resize-corner-hint::after {
+  content: '';
+  position: absolute;
+  background: var(--text-muted);
+  border-radius: 1px;
+}
+.drawer-resize-corner-hint::before {
+  width: 7px; height: 1.5px;
+  bottom: 4px; right: 0;
+  transform: rotate(-45deg);
+  transform-origin: right center;
+}
+.drawer-resize-corner-hint::after {
+  width: 10px; height: 1.5px;
+  bottom: 1px; right: 0;
+  transform: rotate(-45deg);
+  transform-origin: right center;
+}
+

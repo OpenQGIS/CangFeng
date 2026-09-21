@@ -350,6 +350,10 @@
         case 'I':
           if (toggleInfoBtn) toggleInfoBtn.click();
           break;
+        case 'Tab':
+          e.preventDefault();
+          if (toggleInfoBtn) toggleInfoBtn.click();
+          break;
         case 'w':
         case 'W':
           if (e.altKey || e.shiftKey) {
@@ -367,6 +371,9 @@
         if (stage) stage.style.backgroundColor = isDark ? '#07080b' : '#e5e8ed';
       }
     });
+
+    // 初始化浮动面板拖拽与 resize
+    if (drawerEl) initFloatingDrawer(drawerEl);
   }
 
   function openViewerByItem(item) {
@@ -533,6 +540,137 @@
           '[Error] 瓦片初始化失败：' + (err.message || err) + '</div>';
       }
     }
+  }
+
+  /* -------------------------------------------------------------
+     浮动信息面板 · 拖拽移动 & 8向 Resize 引擎
+     ------------------------------------------------------------- */
+  function initFloatingDrawer(el) {
+    if (el._floatInited) return;
+    el._floatInited = true;
+
+    const MIN_W = 240, MIN_H = 200;
+    const MARGIN = 16;
+
+    function getRect() {
+      return {
+        left:   parseFloat(el.style.left)   || el.offsetLeft,
+        top:    parseFloat(el.style.top)    || el.offsetTop,
+        width:  parseFloat(el.style.width)  || el.offsetWidth,
+        height: parseFloat(el.style.height) || el.offsetHeight
+      };
+    }
+
+    function clamp(r) {
+      var vw = el.parentElement ? el.parentElement.offsetWidth  : window.innerWidth;
+      var vh = el.parentElement ? el.parentElement.offsetHeight : window.innerHeight;
+      r.width  = Math.max(MIN_W, Math.min(r.width,  vw - MARGIN));
+      r.height = Math.max(MIN_H, Math.min(r.height, vh - MARGIN));
+      r.left   = Math.max(MARGIN, Math.min(r.left, vw - r.width  - MARGIN));
+      r.top    = Math.max(MARGIN, Math.min(r.top,  vh - r.height - MARGIN));
+      return r;
+    }
+
+    function applyRect(r) {
+      el.style.left   = r.left   + 'px';
+      el.style.top    = r.top    + 'px';
+      el.style.width  = r.width  + 'px';
+      el.style.height = r.height + 'px';
+      el.style.right  = 'auto';
+      el.style.bottom = 'auto';
+    }
+
+    // ── 拖拽：标题栏 ──
+    var dragHandle = el.querySelector('#drawerDragHandle') || el.querySelector('.drawer-header');
+    var dragState  = null;
+
+    function onDragStart(e) {
+      if (e.target.closest('button')) return;
+      e.preventDefault();
+      var r = getRect();
+      var t = e.touches ? e.touches[0] : e;
+      dragState = { sx: t.clientX, sy: t.clientY, ol: r.left, ot: r.top };
+      el.classList.add('dragging');
+      document.addEventListener('mousemove', onDragMove);
+      document.addEventListener('mouseup',   onDragEnd);
+      document.addEventListener('touchmove', onDragMove, { passive: false });
+      document.addEventListener('touchend',  onDragEnd);
+    }
+
+    function onDragMove(e) {
+      if (!dragState) return;
+      e.preventDefault();
+      var t  = e.touches ? e.touches[0] : e;
+      var r  = getRect();
+      applyRect(clamp({ left: dragState.ol + t.clientX - dragState.sx, top: dragState.ot + t.clientY - dragState.sy, width: r.width, height: r.height }));
+    }
+
+    function onDragEnd() {
+      dragState = null;
+      el.classList.remove('dragging');
+      document.removeEventListener('mousemove', onDragMove);
+      document.removeEventListener('mouseup',   onDragEnd);
+      document.removeEventListener('touchmove', onDragMove);
+      document.removeEventListener('touchend',  onDragEnd);
+    }
+
+    if (dragHandle) {
+      dragHandle.addEventListener('mousedown',  onDragStart);
+      dragHandle.addEventListener('touchstart', onDragStart, { passive: false });
+    }
+
+    // ── 8向 Resize ──
+    var resizeState = null;
+
+    function onResizeStart(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var dir = e.currentTarget.dataset.dir;
+      var r   = getRect();
+      var t   = e.touches ? e.touches[0] : e;
+      resizeState = { dir: dir, sx: t.clientX, sy: t.clientY, orig: { left: r.left, top: r.top, width: r.width, height: r.height } };
+      el.classList.add('dragging');
+      document.addEventListener('mousemove', onResizeMove);
+      document.addEventListener('mouseup',   onResizeEnd);
+      document.addEventListener('touchmove', onResizeMove, { passive: false });
+      document.addEventListener('touchend',  onResizeEnd);
+    }
+
+    function onResizeMove(e) {
+      if (!resizeState) return;
+      e.preventDefault();
+      var t    = e.touches ? e.touches[0] : e;
+      var dx   = t.clientX - resizeState.sx;
+      var dy   = t.clientY - resizeState.sy;
+      var o    = resizeState.orig;
+      var dir  = resizeState.dir;
+      var left = o.left, top = o.top, width = o.width, height = o.height;
+      if (dir.indexOf('e') >= 0) { width  = o.width  + dx; }
+      if (dir.indexOf('s') >= 0) { height = o.height + dy; }
+      if (dir.indexOf('w') >= 0) { width  = o.width  - dx; left = o.left + dx; }
+      if (dir.indexOf('n') >= 0) { height = o.height - dy; top  = o.top  + dy; }
+      applyRect(clamp({ left: left, top: top, width: width, height: height }));
+    }
+
+    function onResizeEnd() {
+      resizeState = null;
+      el.classList.remove('dragging');
+      document.removeEventListener('mousemove', onResizeMove);
+      document.removeEventListener('mouseup',   onResizeEnd);
+      document.removeEventListener('touchmove', onResizeMove);
+      document.removeEventListener('touchend',  onResizeEnd);
+    }
+
+    el.querySelectorAll('.drawer-resize-handle').forEach(function(h) {
+      h.addEventListener('mousedown',  onResizeStart);
+      h.addEventListener('touchstart', onResizeStart, { passive: false });
+    });
+
+    // 视口变化时防溢出
+    window.addEventListener('resize', function() {
+      if (!el.classList.contains('open')) return;
+      applyRect(clamp(getRect()));
+    });
   }
 
   function closeViewer() {
