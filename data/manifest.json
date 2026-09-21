@@ -1,0 +1,175 @@
+[
+  {
+    "id": "shanghai",
+    "title": "上海市中心城区空间肌理",
+    "filename": "上海市.png",
+    "category": "original",
+    "categoryName": "原创图片分享",
+    "subCategory": "城市肌理",
+    "description": "运用空间形态学方法提炼上海中心城区建筑密度与肌理演变，突出黄浦江两岸外滩与陆家嘴的现代与历史空间对话。",
+    "author": "原创制图",
+    "tags": [
+      "城市肌理",
+      "矢量制图",
+      "上海核心区"
+    ],
+    "width": 1771,
+    "height": 2362,
+    "aspectRatio": 0.7498,
+    "thumb": "thumbs/shanghai.webp",
+    "tileUrl": "tiles/shanghai_files/",
+    "maxLevel": 12,
+    "tileSize": 256,
+    "overlap": 0,
+    "format": "webp",
+    "dzi": {
+      "Image": {
+        "xmlns": "http://schemas.microsoft.com/deepzoom/2008",
+        "Url": "tiles/shanghai_files/",
+        "Format": "webp",
+        "Overlap": "0",
+        "TileSize": "256",
+        "Size": {
+          "Width": 1771,
+          "Height": 2362
+        }
+      }
+    }
+  },
+  {
+    "id": "city_papercut_14pro",
+    "title": "城市剪纸-14PRO-250614",
+    "filename": "城市剪纸-14PRO-250614.png",
+    "category": "original",
+    "categoryName": "原创图片分享",
+    "subCategory": "城市肌理",
+    "description": "",
+    "author": "原创作者",
+    "tags": [
+      "城市肌理"
+    ],
+    "width": 1170,
+    "height": 2532,
+    "aspectRatio": 0.4621,
+    "thumb": "thumbs/city_papercut_14pro.webp",
+    "tileUrl": "tiles/city_papercut_14pro_files/",
+    "maxLevel": 12,
+    "tileSize": 256,
+    "overlap": 0,
+    "format": "webp",
+    "dzi": {
+      "Image": {
+        "xmlns": "http://schemas.microsoft.com/deepzoom/2008",
+        "Url": "tiles/city_papercut_14pro_files/",
+        "Format": "webp",
+        "Overlap": "0",
+        "TileSize": "256",
+        "Size": {
+          "Width": 1170,
+          "Height": 2532
+        }
+      }
+    }
+  },
+  {
+    "id": "chengdu_papercut_ipad",
+    "title": "成都剪纸-iPAD_pro_10.5_in",
+    "filename": "成都剪纸-iPAD_pro_10.5_in.png",
+    "category": "original",
+    "categoryName": "原创图片分享",
+    "subCategory": "城市肌理",
+    "description": "",
+    "author": "原创作者",
+    "tags": [
+      "城市肌理"
+    ],
+    "width": 2224,
+    "height": 1668,
+    "aspectRatio": 1.3333,
+    "thumb": "thumbs/chengdu_papercut_ipad.webp",
+    "tileUrl": "tiles/chengdu_papercut_ipad_files/",
+    "maxLevel": 12,
+    "tileSize": 256,
+    "overlap": 0,
+    "format": "webp",
+    "dzi": {
+      "Image": {
+        "xmlns": "http://schemas.microsoft.com/deepzoom/2008",
+        "Url": "tiles/chengdu_papercut_ipad_files/",
+        "Format": "webp",
+        "Overlap": "0",
+        "TileSize": "256",
+        "Size": {
+          "Width": 2224,
+          "Height": 1668
+        }
+      }
+    }
+  },
+  {
+    "id": "layout_pattern_02",
+    "title": "布局方式2",
+    "filename": "布局方式2.jpg",
+    "category": "original",
+    "categoryName": "原创图片分享",
+    "subCategory": "原创设计",
+    "description": "",
+    "author": "原创作者",
+    "tags": [],
+    "width": 7086,
+    "height": 3543,
+    "aspectRatio": 2,
+    "thumb": "thumbs/layout_pattern_02.webp",
+    "tileUrl": "tiles/layout_pattern_02_files/",
+    "maxLevel": 13,
+    "tileSize": 256,
+    "overlap": 0,
+    "format": "webp",
+    "dzi": {
+      "Image": {
+        "xmlns": "http://schemas.microsoft.com/deepzoom/2008",
+        "Url": "tiles/layout_pattern_02_files/",
+        "Format": "webp",
+        "Overlap": "0",
+        "TileSize": "256",
+        "Size": {
+          "Width": 7086,
+          "Height": 3543
+        }
+      }
+    }
+  },
+  {
+    "id": "jinjiang_greenway_section",
+    "title": "锦江绿道_黄龙溪_剖面",
+    "filename": "锦江绿道_黄龙溪_剖面.png",
+    "category": "original",
+    "categoryName": "原创图片分享",
+    "subCategory": "原创设计",
+    "description": "",
+    "author": "原创作者",
+    "tags": [],
+    "width": 1771,
+    "height": 2362,
+    "aspectRatio": 0.7498,
+    "thumb": "thumbs/jinjiang_greenway_section.webp",
+    "tileUrl": "tiles/jinjiang_greenway_section_files/",
+    "maxLevel": 12,
+    "tileSize": 256,
+    "overlap": 0,
+    "format": "webp",
+    "dzi": {
+      "Image": {
+        "xmlns": "http://schemas.microsoft.com/deepzoom/2008",
+        "Url": "tiles/jinjiang_greenway_section_files/",
+        "Format": "webp",
+        "Overlap": "0",
+        "TileSize": "256",
+        "Size": {
+          "Width": 1771,
+          "Height": 2362
+        }
+      }
+    }
+  }
+]
