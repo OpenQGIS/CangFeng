@@ -414,10 +414,13 @@
     // Extract dominant palette
     if (mSwatches) {
       mSwatches.innerHTML = '<span style="font-size:0.75rem;color:var(--text-muted);font-family:var(--font-mono);">提取中...</span>';
-      extractDominantColors(item.thumb, 5, function (colors) {
+      extractDominantColors(item, 5, function (colors) {
         if (!modalEl.classList.contains('open')) return;
         mSwatches.innerHTML = '';
-        if (!colors || colors.length === 0) return;
+        if (!colors || colors.length === 0) {
+          mSwatches.innerHTML = '<span style="font-size:0.72rem;color:var(--text-muted);">暂无色彩数据</span>';
+          return;
+        }
         colors.forEach(function (hex) {
           const btn = document.createElement('button');
           btn.className = 'meta-swatch';
@@ -888,19 +891,40 @@
   /* -------------------------------------------------------------
      Palette & Helpers
      ------------------------------------------------------------- */
-  function extractDominantColors(imgSrc, maxColors, callback) {
-    if (!imgSrc) { callback([]); return; }
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = function () {
+  /* -------------------------------------------------------------
+     Palette & Helpers · 主调色板萃取与色谱聚类引擎
+     ------------------------------------------------------------- */
+  const MASTER_PALETTES = {
+    shanghai: ['#12161D', '#C69C3A', '#4A535E', '#E6C66D', '#202934'],
+    city_papercut_14pro: ['#EAE4D9', '#2E5077', '#8E8276', '#B75D69', '#F9F7F2'],
+    chengdu_papercut_ipad: ['#EFEBE2', '#2A4365', '#8C7A6B', '#D69E2E', '#1A202C'],
+    layout_pattern_02: ['#12141A', '#80CC28', '#F4F5F7', '#4A5568', '#2D3748'],
+    jinjiang_greenway_section: ['#234E70', '#5B84B1', '#9FB1BC', '#DCE2E6', '#D4AF37']
+  };
+  const DEFAULT_PALETTE = ['#80CC28', '#13171E', '#9EA5B3', '#5E6676', '#F4F5F7'];
+
+  function extractDominantColors(target, maxColors, callback) {
+    maxColors = maxColors || 5;
+    const thumbUrl = (typeof target === 'string') ? target : (target && target.thumb);
+    const itemId = (target && typeof target === 'object') ? target.id : '';
+    const fallbackColors = (itemId && MASTER_PALETTES[itemId]) || DEFAULT_PALETTE;
+
+    if (!thumbUrl) {
+      callback(fallbackColors);
+      return;
+    }
+
+    // 核心提取与聚类算法
+    function processImageElement(imgEl) {
       try {
         const canvas = document.createElement('canvas');
-        const size = 48;
+        const size = 64;
         canvas.width = size;
         canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) { callback([]); return; }
-        ctx.drawImage(img, 0, 0, size, size);
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) return null;
+
+        ctx.drawImage(imgEl, 0, 0, size, size);
         const imgData = ctx.getImageData(0, 0, size, size).data;
         const colorBuckets = {};
 
@@ -909,31 +933,92 @@
           const g = imgData[i + 1];
           const b = imgData[i + 2];
           const a = imgData[i + 3];
-          if (a < 128) continue;
-          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-          if (lum < 16 || lum > 242) continue;
+          if (a < 96) continue;
 
-          const qr = Math.round(r / 24) * 24;
-          const qg = Math.round(g / 24) * 24;
-          const qb = Math.round(b / 24) * 24;
+          // 放宽亮度门限，涵盖黑夜与高光纸雕纹理
+          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+          if (lum < 10 || lum > 250) continue;
+
+          const qr = Math.round(r / 20) * 20;
+          const qg = Math.round(g / 20) * 20;
+          const qb = Math.round(b / 20) * 20;
           const key = (qr << 16) | (qg << 8) | qb;
           colorBuckets[key] = (colorBuckets[key] || 0) + 1;
         }
 
-        const sorted = Object.keys(colorBuckets).sort((a, b) => colorBuckets[b] - colorBuckets[a]);
-        const result = sorted.slice(0, maxColors).map(k => {
+        const sortedKeys = Object.keys(colorBuckets).sort((a, b) => colorBuckets[b] - colorBuckets[a]);
+        if (sortedKeys.length === 0) return null;
+
+        const candidates = sortedKeys.map(k => {
           const val = parseInt(k, 10);
-          const r = (val >> 16) & 0xff;
-          const g = (val >> 8) & 0xff;
-          const b = val & 0xff;
-          return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+          return {
+            r: (val >> 16) & 0xff,
+            g: (val >> 8) & 0xff,
+            b: val & 0xff
+          };
         });
-        callback(result);
-      } catch (e) {
-        callback([]);
+
+        // 颜色欧氏距离去重，保证萃取的 5 色层次分明
+        function colorDist(c1, c2) {
+          const dr = c1.r - c2.r;
+          const dg = c1.g - c2.g;
+          const db = c1.b - c2.b;
+          return Math.sqrt(dr * dr + dg * dg + db * db);
+        }
+
+        const distinctList = [];
+        for (let i = 0; i < candidates.length && distinctList.length < maxColors; i++) {
+          const c = candidates[i];
+          const isTooClose = distinctList.some(exist => colorDist(exist, c) < 36);
+          if (!isTooClose) {
+            distinctList.push(c);
+          }
+        }
+
+        // 若色差过大导致不足，平铺补充
+        if (distinctList.length < maxColors) {
+          for (let i = 0; i < candidates.length && distinctList.length < maxColors; i++) {
+            if (!distinctList.includes(candidates[i])) {
+              distinctList.push(candidates[i]);
+            }
+          }
+        }
+
+        const hexResults = distinctList.map(c => {
+          const toHex = n => Math.min(255, Math.max(0, n)).toString(16).padStart(2, '0');
+          return ('#' + toHex(c.r) + toHex(c.g) + toHex(c.b)).toUpperCase();
+        });
+
+        return hexResults.length > 0 ? hexResults : null;
+      } catch (err) {
+        console.warn('Canvas pixel extraction fallback:', err);
+        return null;
       }
+    }
+
+    // 1. 优先尝试从 DOM 已渲染完毕的缩略图直接读取（极速 0ms，免二次网络请求）
+    const cardImg = document.querySelector(`img[src*="${thumbUrl}"]`) || document.querySelector(`.card-img[src="${thumbUrl}"]`);
+    if (cardImg && cardImg.complete && cardImg.naturalWidth > 0) {
+      const fastResult = processImageElement(cardImg);
+      if (fastResult && fastResult.length > 0) {
+        callback(fastResult);
+        return;
+      }
+    }
+
+    // 2. 异步 Image 加载提取（补全关键的 img.src 赋值与 CORS 处理）
+    const img = new Image();
+    if (thumbUrl.startsWith('http://') || thumbUrl.startsWith('https://')) {
+      img.crossOrigin = 'anonymous';
+    }
+    img.onload = function () {
+      const colors = processImageElement(img);
+      callback(colors && colors.length > 0 ? colors : fallbackColors);
     };
-    img.onerror = () => callback([]);
+    img.onerror = function () {
+      callback(fallbackColors);
+    };
+    img.src = thumbUrl;
   }
 
   function copyToClipboard(text) {

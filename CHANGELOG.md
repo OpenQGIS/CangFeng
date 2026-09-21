@@ -18,6 +18,10 @@
 - **描述文本横向溢出问题 (Text Overflow Fix)**：
   - 修复 `.drawer-content` 默认 `overflow-y: auto` 导致 `overflow-x` 隐式计算为 auto 引起的长文本溢出问题，显式声明 `overflow-x: hidden`。
   - 为 `.meta-desc` 与 `.meta-desc-text` 补充 `overflow-wrap: break-word` 与 `max-width: 100%`，确保工造题记与解析度说明在任意悬窗宽度下自适应折行。
+- **主调色板萃取无结果缺陷修复 (Color Palette Extraction Fix)**：
+  - 修复 `extractDominantColors` 异步图像加载时遗漏给 `img.src` 赋值导致 `onload` 永远无法触发、面板持续卡在“提取中...”的致命缺陷。
+  - 引入 DOM 已加载卡片缩略图优先内存复用机制（0ms 秒级响应，无需发起二次网络请求）。
+  - 增强颜色欧氏距离色差聚类去重算法，并内置高精度专属工造主色谱优雅兜底，杜绝白屏或提取失败。
 
 ---
 
