@@ -1,4 +1,4 @@
-window.GALLERY_MANIFEST = [
+window.CANGFENG_MANIFEST = window.GALLERY_MANIFEST = [
   {
     "id": "shanghai",
     "title": "上海市中心城区空间肌理",

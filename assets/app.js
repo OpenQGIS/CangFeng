@@ -22,8 +22,13 @@
   async function init() {
     bindAntiTheft();
 
-    if (window.GALLERY_MANIFEST) {
-      setupData(window.GALLERY_MANIFEST);
+    if (window.OpenSeadragon && OpenSeadragon.setImageFormatsSupported) {
+      OpenSeadragon.setImageFormatsSupported({ webp: true });
+    }
+
+    const manifestData = window.CANGFENG_MANIFEST || window.GALLERY_MANIFEST;
+    if (manifestData) {
+      setupData(manifestData);
       initGallery();
       return;
     }
@@ -53,6 +58,9 @@
       if (assetBase) {
         if (item.tileUrl && !item.tileUrl.startsWith('http')) {
           item.tileUrl = assetBase + '/' + item.tileUrl.replace(/^\/+/, '');
+        }
+        if (item.dzi && item.dzi.Image && item.dzi.Image.Url && !item.dzi.Image.Url.startsWith('http')) {
+          item.dzi.Image.Url = assetBase + '/' + item.dzi.Image.Url.replace(/^\/+/, '');
         }
       }
       return item;
@@ -416,51 +424,88 @@
     if (!stage) return;
     stage.innerHTML = '';
 
-    const config = window.CANGFENG_CONFIG || {};
-    const assetBase = (config.assetBaseUrl || '').replace(/\/+$/, '');
-
-    // Clone DZI and inject assetBaseUrl if remote
-    let tileSource = JSON.parse(JSON.stringify(item.dzi));
-    if (assetBase) {
-      tileSource.Image.Url = assetBase + '/' + tileSource.Image.Url.replace(/^\/+/, '');
+    if (osdViewer) {
+      try { osdViewer.destroy(); } catch (e) {}
+      osdViewer = null;
     }
 
     const isDark = (document.documentElement.getAttribute('data-theme') !== 'light');
+    const stageBg = isDark ? '#07080b' : '#e5e8ed';
+
+    const config = window.CANGFENG_CONFIG || {};
+    const assetBase = (config.assetBaseUrl || '').replace(/\/+$/, '');
+
+    // Resolve tileBase URL (support remote Cloudflare CDN or local tiles)
+    let tileBase = (item.tileUrl || (item.dzi && item.dzi.Image && item.dzi.Image.Url) || '');
+    if (assetBase && !tileBase.startsWith('http')) {
+      tileBase = assetBase + '/' + tileBase.replace(/^\/+/, '');
+    }
+    tileBase = tileBase.replace(/\/+$/, '') + '/';
+
+    const tileWidth = item.width || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Width) || 2000;
+    const tileHeight = item.height || (item.dzi && item.dzi.Image && item.dzi.Image.Size && item.dzi.Image.Size.Height) || 2000;
+    const tileMaxLevel = item.maxLevel !== undefined ? item.maxLevel : Math.ceil(Math.log2(Math.max(tileWidth, tileHeight)));
+
+    const tileSource = {
+      width: tileWidth,
+      height: tileHeight,
+      tileSize: item.tileSize || 256,
+      tileOverlap: item.overlap || 0,
+      minLevel: 0,
+      maxLevel: tileMaxLevel,
+      getTileUrl: function (level, x, y) {
+        return tileBase + level + '/' + x + '_' + y + '.' + (item.format || 'webp');
+      }
+    };
 
     try {
       osdViewer = OpenSeadragon({
         element: stage,
-        prefixUrl: 'vendor/openseadragon-images/',
+        prefixUrl: '',
         showNavigationControl: false,
         showNavigator: false,
         autoResize: true,
         animationTime: 0.45,
         blendTime: 0.15,
         constrainDuringPan: true,
-        maxZoomPixelRatio: 2.5,
+        maxZoomPixelRatio: 3.5,
         minZoomImageRatio: 0.8,
         visibilityRatio: 0.9,
         wrapHorizontal: false,
         wrapVertical: false,
         tileSources: tileSource,
-        placeholderImage: item.thumb,
-        immediateRender: true,
-        crossOriginPolicy: 'Anonymous',
-        backgroundColor: isDark ? '#07080b' : '#e5e8ed'
+        placeholderFillStyle: stageBg,
+        crossOriginPolicy: false,
+        ajaxWithCredentials: false,
+        backgroundColor: stageBg
       });
 
       const badge = document.getElementById('toolZoomBadge');
-      osdViewer.addHandler('zoom', function (e) {
+      osdViewer.addHandler('zoom', function () {
         if (!badge || !osdViewer || !osdViewer.viewport) return;
         const currentZoom = osdViewer.viewport.getZoom();
         const baseZoom = osdViewer.viewport.getHomeZoom();
         const ratio = baseZoom > 0 ? (currentZoom / baseZoom) : 1;
         badge.textContent = Math.round(ratio * 100) + '%';
       });
+
+      osdViewer.addHandler('open-failed', function (e) {
+        console.error('OpenSeadragon open-failed:', e);
+        if (stage) {
+          stage.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ff5555;font-family:var(--font-mono);">' +
+            '[Error] 瓦片加载失败，请检查网络连接或 Cloudflare 图源。</div>';
+        }
+      });
+
+      osdViewer.addHandler('tile-load-failed', function (e) {
+        console.warn('OpenSeadragon tile-load-failed:', e);
+      });
     } catch (err) {
       console.error('OpenSeadragon init failed:', err);
-      stage.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ff5555;font-family:var(--font-mono);">' +
-        '[Error] 瓦片加载失败，请检查 Cloudflare 跨域配置或图源连接。</div>';
+      if (stage) {
+        stage.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ff5555;font-family:var(--font-mono);">' +
+          '[Error] 瓦片初始化失败：' + (err.message || err) + '</div>';
+      }
     }
   }
 
