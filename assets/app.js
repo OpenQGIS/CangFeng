@@ -196,13 +196,14 @@
 
     const backdropEl = document.getElementById('viewerBackdrop');
     const closeBtn = document.getElementById('btnCloseViewer');
+    const closeRightBtn = document.getElementById('btnCloseViewerRight');
     const prevBtn = document.getElementById('btnPrevArtwork');
     const nextBtn = document.getElementById('btnNextArtwork');
     const edgePrevBtn = document.getElementById('btnEdgePrev');
     const edgeNextBtn = document.getElementById('btnEdgeNext');
     const toggleInfoBtn = document.getElementById('btnToggleInfo');
-    const drawerEl = document.getElementById('viewerMetaDrawer');
-    const drawerCloseBtn = document.getElementById('btnCloseDrawer');
+    const drawerEl = document.getElementById('viewerMetaDrawer') || document.getElementById('viewerDrawer');
+    const drawerCloseBtn = document.getElementById('btnCloseDrawer') || document.getElementById('btnDrawerClose');
 
     const toolZoomIn = document.getElementById('toolZoomIn');
     const toolZoomOut = document.getElementById('toolZoomOut');
@@ -211,22 +212,27 @@
     const toolFullscreen = document.getElementById('toolFullscreen');
     const toolActualSize = document.getElementById('toolActualSize');
 
-    backdropEl.addEventListener('click', closeViewer);
-    closeBtn.addEventListener('click', closeViewer);
-    prevBtn.addEventListener('click', () => navigateArtwork(-1));
-    nextBtn.addEventListener('click', () => navigateArtwork(1));
+    if (backdropEl) backdropEl.addEventListener('click', closeViewer);
+    if (closeBtn) closeBtn.addEventListener('click', closeViewer);
+    if (closeRightBtn) closeRightBtn.addEventListener('click', closeViewer);
+    if (prevBtn) prevBtn.addEventListener('click', () => navigateArtwork(-1));
+    if (nextBtn) nextBtn.addEventListener('click', () => navigateArtwork(1));
     if (edgePrevBtn) edgePrevBtn.addEventListener('click', () => navigateArtwork(-1));
     if (edgeNextBtn) edgeNextBtn.addEventListener('click', () => navigateArtwork(1));
 
     if (toggleInfoBtn && drawerEl) {
-      toggleInfoBtn.addEventListener('click', () => {
+      toggleInfoBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const isOpen = drawerEl.classList.toggle('open');
         toggleInfoBtn.classList.toggle('active', isOpen);
       });
     }
 
     if (drawerCloseBtn && drawerEl) {
-      drawerCloseBtn.addEventListener('click', () => {
+      drawerCloseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         drawerEl.classList.remove('open');
         if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
       });
@@ -291,6 +297,10 @@
       if (toolFullscreen) {
         toolFullscreen.innerHTML = isFs ? SVG_EXIT_FULLSCREEN : SVG_FULLSCREEN;
       }
+      if (isFs && drawerEl) {
+        drawerEl.classList.remove('open');
+        if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
+      }
     });
 
     window.addEventListener('keydown', (e) => {
@@ -300,6 +310,9 @@
         case 'Escape':
           if (document.fullscreenElement) {
             document.exitFullscreen().catch(() => {});
+          } else if (drawerEl && drawerEl.classList.contains('open')) {
+            drawerEl.classList.remove('open');
+            if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');
           } else {
             closeViewer();
           }
@@ -530,7 +543,7 @@
     modalEl.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
 
-    const drawerEl = document.getElementById('viewerMetaDrawer');
+    const drawerEl = document.getElementById('viewerMetaDrawer') || document.getElementById('viewerDrawer');
     if (drawerEl) drawerEl.classList.remove('open');
     const toggleInfoBtn = document.getElementById('btnToggleInfo');
     if (toggleInfoBtn) toggleInfoBtn.classList.remove('active');

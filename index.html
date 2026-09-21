@@ -121,6 +121,9 @@
           <button class="nav-btn info-btn" id="btnToggleInfo" title="作品档案与色板 (I)">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
           </button>
+          <button class="nav-btn" id="btnCloseViewerRight" title="退出阅览 (Esc)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
         </div>
       </header>
 
@@ -155,39 +158,39 @@
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
           </button>
         </div>
-
-        <!-- Sliding Metadata & Palette Drawer -->
-        <aside class="viewer-meta-drawer" id="viewerMetaDrawer">
-          <div class="drawer-header">
-            <h3 class="drawer-title">成果卷宗档案</h3>
-            <button class="nav-btn" id="btnCloseDrawer" title="收起面板 (I)">
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-            </button>
-          </div>
-          <div class="drawer-content">
-            <div class="meta-section">
-              <h4 class="meta-section-title">基本信息</h4>
-              <dl class="meta-list">
-                <div class="meta-row"><dt>卷名</dt><dd id="mTitle">-</dd></div>
-                <div class="meta-row"><dt>工造门类</dt><dd id="mCategory">-</dd></div>
-                <div class="meta-row"><dt>匠师</dt><dd id="mAuthor">原创</dd></div>
-                <div class="meta-row"><dt>原生解析度</dt><dd id="mResolution">-</dd></div>
-                <div class="meta-row"><dt>画幅构图</dt><dd id="mRatio">-</dd></div>
-              </dl>
-            </div>
-
-            <div class="meta-section" id="metaThemeSection">
-              <h4 class="meta-section-title">主调色板萃取</h4>
-              <div class="palette-swatches" id="mPalette"></div>
-            </div>
-
-            <div class="meta-section">
-              <h4 class="meta-section-title">工造题记与说明</h4>
-              <p class="meta-desc" id="mDescription">暂无说明</p>
-            </div>
-          </div>
-        </aside>
       </div>
+
+      <!-- Sliding Metadata & Palette Drawer (置于 viewer-container 根层级，全屏通栏磨砂浮层) -->
+      <aside class="viewer-drawer viewer-meta-drawer" id="viewerMetaDrawer">
+        <div class="drawer-header">
+          <h3 class="drawer-title">成果卷宗档案</h3>
+          <button class="drawer-close-btn nav-btn" id="btnCloseDrawer" title="收起面板 (I)" aria-label="收起面板">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
+        </div>
+        <div class="drawer-content">
+          <div class="meta-section">
+            <h4 class="meta-section-title">基本信息</h4>
+            <dl class="meta-list">
+              <div class="meta-row"><dt>卷名</dt><dd id="mTitle">-</dd></div>
+              <div class="meta-row"><dt>工造门类</dt><dd id="mCategory">-</dd></div>
+              <div class="meta-row"><dt>匠师</dt><dd id="mAuthor">原创</dd></div>
+              <div class="meta-row"><dt>原生解析度</dt><dd id="mResolution">-</dd></div>
+              <div class="meta-row"><dt>画幅构图</dt><dd id="mRatio">-</dd></div>
+            </dl>
+          </div>
+
+          <div class="meta-section" id="metaThemeSection">
+            <h4 class="meta-section-title">主调色板萃取</h4>
+            <div class="palette-swatches" id="mPalette"></div>
+          </div>
+
+          <div class="meta-section">
+            <h4 class="meta-section-title">工造题记与说明</h4>
+            <p class="meta-desc" id="mDescription">暂无说明</p>
+          </div>
+        </div>
+      </aside>
     </div>
   </div>
 
