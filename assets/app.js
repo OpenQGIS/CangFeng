@@ -337,6 +337,13 @@
         case 'I':
           if (toggleInfoBtn) toggleInfoBtn.click();
           break;
+        case 'w':
+        case 'W':
+          if (e.altKey || e.shiftKey) {
+            e.preventDefault();
+            StealthWatermark.toggleReveal();
+          }
+          break;
       }
     });
 
@@ -480,6 +487,12 @@
         backgroundColor: stageBg
       });
 
+      StealthWatermark.init(stage, item);
+
+      osdViewer.addHandler('update-viewport', function () {
+        StealthWatermark.burnIn(osdViewer);
+      });
+
       const badge = document.getElementById('toolZoomBadge');
       osdViewer.addHandler('zoom', function () {
         if (!badge || !osdViewer || !osdViewer.viewport) return;
@@ -510,6 +523,7 @@
   }
 
   function closeViewer() {
+    StealthWatermark.destroy();
     const modalEl = document.getElementById('viewerModal');
     if (!modalEl) return;
     modalEl.classList.remove('open');
@@ -528,6 +542,197 @@
     const stage = document.getElementById('osdStage');
     if (stage) stage.innerHTML = '';
   }
+
+  /* -------------------------------------------------------------
+     Stealth Digital Watermark & Anti-Theft Security Engine
+     ------------------------------------------------------------- */
+  const StealthWatermark = (function () {
+    let overlayCanvas = null;
+    let overlayCtx = null;
+    let currentStage = null;
+    let currentItem = null;
+    let isRevealed = false;
+    let observer = null;
+    const sessionSignature = 'CF-' + Math.random().toString(36).substring(2, 7).toUpperCase() + '-' + (new Date().toISOString().slice(0, 10).replace(/-/g, ''));
+
+    function init(stageEl, item) {
+      currentStage = stageEl;
+      currentItem = item;
+      if (!stageEl) return;
+
+      let canvas = stageEl.querySelector('.stealth-watermark-overlay');
+      if (!canvas) {
+        canvas = document.createElement('canvas');
+        canvas.className = 'stealth-watermark-overlay';
+        canvas.setAttribute('aria-hidden', 'true');
+        stageEl.appendChild(canvas);
+      }
+      overlayCanvas = canvas;
+      overlayCtx = canvas.getContext('2d');
+
+      resize();
+      draw();
+
+      // Anti-Tamper Guard: If removed in DevTools, immediately restore
+      if (observer) observer.disconnect();
+      observer = new MutationObserver(() => {
+        if (currentStage && !currentStage.querySelector('.stealth-watermark-overlay')) {
+          init(currentStage, currentItem);
+        }
+      });
+      observer.observe(stageEl, { childList: true });
+    }
+
+    function resize() {
+      if (!overlayCanvas || !currentStage) return;
+      const rect = currentStage.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      overlayCanvas.width = Math.round(rect.width * dpr);
+      overlayCanvas.height = Math.round(rect.height * dpr);
+      overlayCanvas.style.width = rect.width + 'px';
+      overlayCanvas.style.height = rect.height + 'px';
+      draw();
+    }
+
+    function draw() {
+      if (!overlayCanvas || !overlayCtx) return;
+      const dpr = window.devicePixelRatio || 1;
+      const w = overlayCanvas.width;
+      const h = overlayCanvas.height;
+
+      overlayCtx.save();
+      overlayCtx.clearRect(0, 0, w, h);
+
+      const idStr = currentItem ? currentItem.id : 'cangfeng';
+      const line1 = 'OpenQGIS · 藏锋录 · 版权所有';
+      const line2 = 'CANGFENG · PROTECTED · ' + idStr;
+      const line3 = 'TRACE: ' + sessionSignature;
+
+      if (isRevealed) {
+        overlayCtx.font = `bold ${Math.round(13 * dpr)}px monospace`;
+        overlayCtx.fillStyle = 'rgba(245, 197, 24, 0.78)';
+        overlayCtx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        overlayCtx.shadowBlur = 4 * dpr;
+      } else {
+        // Micro-alpha: 0.008 is completely imperceptible to human eyes on artwork textures
+        // But under contrast equalization / threshold curves in Photoshop, it pops out crystal clear!
+        overlayCtx.font = `${Math.round(12 * dpr)}px monospace`;
+        overlayCtx.fillStyle = 'rgba(255, 255, 255, 0.008)';
+        overlayCtx.shadowColor = 'rgba(0, 0, 0, 0.008)';
+        overlayCtx.shadowBlur = 1 * dpr;
+        overlayCtx.shadowOffsetX = 1 * dpr;
+        overlayCtx.shadowOffsetY = 1 * dpr;
+      }
+
+      overlayCtx.textAlign = 'center';
+      overlayCtx.textBaseline = 'middle';
+
+      const angle = -24 * Math.PI / 180;
+      const stepX = 280 * dpr;
+      const stepY = 140 * dpr;
+
+      overlayCtx.translate(w / 2, h / 2);
+      overlayCtx.rotate(angle);
+
+      const diagonal = Math.ceil(Math.sqrt(w * w + h * h));
+      let row = 0;
+      for (let y = -diagonal; y < diagonal; y += stepY) {
+        const xOffset = (row % 2 === 0) ? 0 : (stepX / 2);
+        for (let x = -diagonal + xOffset; x < diagonal; x += stepX) {
+          overlayCtx.fillText(line1, x, y - (12 * dpr));
+          overlayCtx.fillText(line2, x, y + (4 * dpr));
+          overlayCtx.fillText(line3, x, y + (20 * dpr));
+        }
+        row++;
+      }
+      overlayCtx.restore();
+    }
+
+    // Burn-in directly into OpenSeadragon's internal canvas bitmap for screenshot proofing
+    function burnIn(osd) {
+      if (!osd || !osd.drawer || !osd.drawer.context || !osd.drawer.canvas) return;
+      const ctx = osd.drawer.context;
+      const canvas = osd.drawer.canvas;
+      const w = canvas.width;
+      const h = canvas.height;
+      const dpr = window.devicePixelRatio || 1;
+
+      ctx.save();
+      ctx.font = `${Math.round(12 * dpr)}px monospace`;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.006)';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const angle = -24 * Math.PI / 180;
+      const stepX = 300 * dpr;
+      const stepY = 150 * dpr;
+
+      ctx.translate(w / 2, h / 2);
+      ctx.rotate(angle);
+
+      const diagonal = Math.ceil(Math.sqrt(w * w + h * h));
+      const line = 'OpenQGIS · 藏锋录 · ' + sessionSignature;
+
+      let r = 0;
+      for (let y = -diagonal; y < diagonal; y += stepY) {
+        const xOffset = (r % 2 === 0) ? 0 : (stepX / 2);
+        for (let x = -diagonal + xOffset; x < diagonal; x += stepX) {
+          ctx.fillText(line, x, y);
+        }
+        r++;
+      }
+      ctx.restore();
+    }
+
+    function toggleReveal(force) {
+      isRevealed = (force !== undefined) ? force : !isRevealed;
+      if (overlayCanvas) {
+        overlayCanvas.classList.toggle('revealed', isRevealed);
+      }
+      draw();
+
+      const modalEl = document.getElementById('viewerModal');
+      let hud = document.getElementById('forensicHud');
+      if (isRevealed) {
+        if (!hud && modalEl) {
+          hud = document.createElement('div');
+          hud.id = 'forensicHud';
+          hud.className = 'forensic-hud';
+          hud.innerHTML = '<svg class="icon mini" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>' +
+            '<span>数字盲水印溯源系统已激活 · 隐形网格布防中 (按 Alt+W 恢复隐形)</span>';
+          modalEl.appendChild(hud);
+        }
+      } else {
+        if (hud) hud.remove();
+      }
+      return isRevealed;
+    }
+
+    function destroy() {
+      if (observer) {
+        observer.disconnect();
+        observer = null;
+      }
+      if (overlayCanvas) {
+        overlayCanvas.remove();
+        overlayCanvas = null;
+        overlayCtx = null;
+      }
+      const hud = document.getElementById('forensicHud');
+      if (hud) hud.remove();
+      isRevealed = false;
+      currentStage = null;
+      currentItem = null;
+    }
+
+    return {
+      init: init,
+      resize: resize,
+      burnIn: burnIn,
+      toggleReveal: toggleReveal,
+      destroy: destroy
+    };
+  })();
 
   /* -------------------------------------------------------------
      Palette & Helpers
@@ -594,11 +799,40 @@
   }
 
   function bindAntiTheft() {
+    // 1. 全局封锁右键菜单 (Prevent Save Image As, Inspect context)
     document.addEventListener('contextmenu', (e) => {
-      if (e.target.tagName === 'IMG' || e.target.closest('.osd-stage')) {
+      e.preventDefault();
+    }, { capture: true });
+
+    // 2. 全局禁止图片/画板拖拽
+    document.addEventListener('dragstart', (e) => {
+      e.preventDefault();
+    }, { capture: true });
+
+    // 3. 拦截常见扒图/保存快捷键 (Ctrl+S, Ctrl+P, Ctrl+U)
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P' || e.key === 'u' || e.key === 'U')) {
         e.preventDefault();
       }
+      // 取证盲水印自检快捷键: Alt+W 或 Shift+W
+      if ((e.altKey || e.shiftKey) && (e.key === 'w' || e.key === 'W')) {
+        const modalEl = document.getElementById('viewerModal');
+        if (modalEl && modalEl.classList.contains('open')) {
+          e.preventDefault();
+          StealthWatermark.toggleReveal();
+        }
+      }
     });
+
+    // 4. 监听窗口缩放同步水印画布尺寸
+    window.addEventListener('resize', () => {
+      StealthWatermark.resize();
+    });
+
+    // 5. 暴露全局开发者自检接口
+    window.revealWatermark = function (state) {
+      return StealthWatermark.toggleReveal(state);
+    };
   }
 
   document.addEventListener('DOMContentLoaded', init);
