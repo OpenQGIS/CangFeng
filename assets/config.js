@@ -9,11 +9,11 @@
  * 3. 外部生态关联：支持一键导航回 Gallery 聚合大厅与 Cabinet 共享精选库。
  */
 window.CANGFENG_CONFIG = {
-  // 外部挂载 CDN 节点 (Cloudflare Pages / R2 托管全量切片，结尾不带斜杠)
-  assetBaseUrl: 'https://gallerycore.pages.dev',
+  // 外部挂载 CDN 节点 (Cloudflare 托管全量切片，结尾不带斜杠)
+  assetBaseUrl: 'https://cangfengcore.lidmwork.workers.dev',
 
   // 云端全景展厅直达链接
-  coreLiveUrl: 'https://gallerycore.pages.dev',
+  coreLiveUrl: 'https://cangfengcore.lidmwork.workers.dev',
 
   // 共享精选库外链 (Cabinet)
   cabinetUrl: 'https://github.com/OpenQGIS/Cabinet',
