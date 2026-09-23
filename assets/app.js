@@ -27,7 +27,7 @@
       OpenSeadragon.setImageFormatsSupported({ webp: true });
     }
 
-    const manifestData = window.CANGFENG_MANIFEST || window.GALLERY_MANIFEST;
+    const manifestData = window.ATLAS_MANIFEST || window.CANGFENG_MANIFEST || window.GALLERY_MANIFEST;
     if (manifestData) {
       setupData(manifestData);
       initGallery();
@@ -41,7 +41,7 @@
       setupData(data);
       initGallery();
     } catch (err) {
-      console.error('Failed to load CangFeng manifest:', err);
+      console.error('Failed to load Atlas manifest:', err);
       const grid = document.getElementById('galleryGrid');
       if (grid) {
         grid.innerHTML = '<div style="padding: 24px; color: #ff5555; font-family: var(--font-mono); font-size: 0.85rem;">' +
@@ -51,7 +51,7 @@
   }
 
   function setupData(rawItems) {
-    const config = window.CANGFENG_CONFIG || {};
+    const config = window.ATLAS_CONFIG || window.CANGFENG_CONFIG || {};
     const assetBase = (config.assetBaseUrl || '').replace(/\/+$/, '');
 
     galleryItems = rawItems.map((item, idx) => {
@@ -126,6 +126,7 @@
   function createCard(item, localIdx) {
     const card = document.createElement('article');
     card.className = 'gallery-card';
+    card.setAttribute('role', 'button');
     card.tabIndex = 0;
     card.style.setProperty('--aspect-ratio', item.aspectRatio);
 
@@ -463,7 +464,7 @@
     const isDark = (document.documentElement.getAttribute('data-theme') !== 'light');
     const stageBg = isDark ? '#07080b' : '#e5e8ed';
 
-    const config = window.CANGFENG_CONFIG || {};
+    const config = window.ATLAS_CONFIG || window.CANGFENG_CONFIG || {};
     const assetBase = (config.assetBaseUrl || '').replace(/\/+$/, '');
 
     // Resolve tileBase URL (support remote Cloudflare CDN or local tiles)
@@ -505,6 +506,8 @@
         wrapHorizontal: false,
         wrapVertical: false,
         tileSources: tileSource,
+        placeholderImage: item.thumb,
+        immediateRender: true,
         placeholderFillStyle: stageBg,
         crossOriginPolicy: false,
         ajaxWithCredentials: false,
@@ -527,16 +530,56 @@
         badge.textContent = Math.round(ratio * 100) + '%';
       });
 
-      osdViewer.addHandler('open-failed', function (e) {
-        console.error('OpenSeadragon open-failed:', e);
-        if (stage) {
-          stage.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ff5555;font-family:var(--font-mono);">' +
-            '[Error] 瓦片加载失败，请检查网络连接或 Cloudflare 图源。</div>';
-        }
-      });
+      let tileFailCount = 0;
+      let hasFailedOver = false;
 
       osdViewer.addHandler('tile-load-failed', function (e) {
         console.warn('OpenSeadragon tile-load-failed:', e);
+        tileFailCount++;
+        // 若远程切片请求连续失败（如移动端 GFW 拦截 *.workers.dev），自动优雅降级
+        if (!hasFailedOver && tileFailCount >= 3) {
+          hasFailedOver = true;
+          console.warn('CangFeng: 远程瓦片请求受阻，正在自动无缝切换到本地同源切片/高清预览模式...');
+          // 若原先使用的是远程 HTTP CDN，先尝试切换为本地同源相对路径 tiles/
+          if (tileBase.startsWith('http')) {
+            const localBase = 'tiles/' + item.id + '_files/';
+            const fallbackTileSource = Object.assign({}, tileSource, {
+              getTileUrl: function (level, x, y) {
+                return localBase + level + '/' + x + '_' + y + '.' + (item.format || 'webp');
+              }
+            });
+            try {
+              osdViewer.open(fallbackTileSource);
+              return;
+            } catch (err) {
+              console.warn('CangFeng: 本地瓦片加载尝试失败，将转入单图全览模式:', err);
+            }
+          }
+          // 最终兜底：使用已成功加载的缩略/预览图全幅深览
+          try {
+            osdViewer.open({
+              type: 'image',
+              url: item.thumb
+            });
+          } catch (err2) {
+            console.error('CangFeng: 占位预览图降级失败:', err2);
+          }
+        }
+      });
+
+      osdViewer.addHandler('open-failed', function (e) {
+        console.error('OpenSeadragon open-failed:', e);
+        try {
+          osdViewer.open({
+            type: 'image',
+            url: item.thumb
+          });
+        } catch (err) {
+          if (stage) {
+            stage.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ff5555;font-family:var(--font-mono);">' +
+              '[Error] 瓦片加载失败，请检查网络连接。</div>';
+          }
+        }
       });
     } catch (err) {
       console.error('OpenSeadragon init failed:', err);
@@ -728,7 +771,7 @@
     let currentItem = null;
     let isRevealed = false;
     let observer = null;
-    const sessionSignature = 'CF-' + Math.random().toString(36).substring(2, 7).toUpperCase() + '-' + (new Date().toISOString().slice(0, 10).replace(/-/g, ''));
+    const sessionSignature = 'ATLAS-' + Math.random().toString(36).substring(2, 7).toUpperCase() + '-' + (new Date().toISOString().slice(0, 10).replace(/-/g, ''));
 
     function init(stageEl, item) {
       currentStage = stageEl;
@@ -778,9 +821,9 @@
       overlayCtx.save();
       overlayCtx.clearRect(0, 0, w, h);
 
-      const idStr = currentItem ? currentItem.id : 'cangfeng';
-      const line1 = 'OpenQGIS · 藏锋录 · 版权所有';
-      const line2 = 'CANGFENG · PROTECTED · ' + idStr;
+      const idStr = currentItem ? currentItem.id : 'atlas';
+      const line1 = 'OpenQGIS · 地图录 · AtlasLog · 版权所有';
+      const line2 = 'ATLASLOG · PROTECTED · ' + idStr;
       const line3 = 'TRACE: ' + sessionSignature;
 
       if (isRevealed) {
@@ -846,7 +889,7 @@
       ctx.rotate(angle);
 
       const diagonal = Math.ceil(Math.sqrt(w * w + h * h));
-      const line = 'OpenQGIS · 藏锋录 · ' + sessionSignature;
+      const line = 'OpenQGIS · 地图录 · AtlasLog · ' + sessionSignature;
 
       let r = 0;
       for (let y = -diagonal; y < diagonal; y += stepY) {

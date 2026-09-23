@@ -4,6 +4,24 @@
 
 ---
 
+## [1.2.1] - 2026-09-23
+
+### 修复 (Fixed)
+- **移动端与国内公网大图深览加载失败缺陷修复 (Mobile & Mainland Network Tile Delivery Fix)**：
+  - **同源瓦片金字塔内置**：同步内置 `CangFengCore` 全量 5 幅作品 8.04MB WebP 瓦片金字塔目录（`tiles/`），解开 `.gitignore` 限制，使 GitHub Pages 支持同源直接分发，彻底摆脱国内手机蜂窝网络及无代理环境下外部 Cloudflare Workers 免费域名（`*.workers.dev`）被 SNI 阻断导致大图视口黑屏的问题。
+  - **默认直连策略优化**：在 `assets/config.js` 中将 `assetBaseUrl` 默认置空，优先采用本站同源相对路径 `tiles/` 极速加载，免翻墙、免跨域、零网络延迟。
+  - **首帧即时渲染保障 (`placeholderImage`)**：为 OpenSeadragon 视口配置 `placeholderImage: item.thumb` 与 `immediateRender: true`，点开大图 0ms 呈现画作预览，彻底消除等待空白期。
+  - **多级网络容灾降级引擎**：若配置了远程 CDN 且瓦片连续加载失败，系统自动无缝降级切换至本地同源 `tiles/` 或已加载的预览全图，保障在任何弱网或断网离线环境下均能顺畅观赏大图。
+
+### 优化 (Optimized)
+- **移动端竖屏与触控交互适配 (Mobile UI/UX Refinement)**：
+  - 针对手机小屏（`max-width: 768px`）优化顶栏布局，收拢右侧按钮间距，隐藏冗余退出键，确保作品名称完整居中呈现；
+  - 手机端隐藏左右侧边翻页大箭头（`.viewer-edge-nav`），彻底消除双指捏合缩放（Pinch-to-zoom）与单指拖拽平移时的误触与视觉遮挡；
+  - 底部浮动工具栏紧凑化重构，适配小屏边距与触控尺寸；
+  - 移动端浮动信息面板自适应转为底部抽屉式卡片（Bottom Sheet），浏览档案更贴合移动端操作直觉。
+
+---
+
 ## [1.2.0] - 2026-09-21
 
 ### 新增 (Added)

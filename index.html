@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CANGFENG · 藏锋录 · 个人空间工造与视觉成果典藏</title>
+  <title>地图录 · AtlasLog · OpenQGIS 制图作品集 · QMapFlow 深度融合版</title>
   <link rel="stylesheet" href="assets/style.css">
   <script src="assets/config.js"></script>
   <script src="data/themes.js"></script>
@@ -11,19 +11,24 @@
   <script src="assets/theme.js"></script>
   <script src="vendor/openseadragon.min.js"></script>
 </head>
-<body data-page="cangfeng">
+<body data-page="atlas">
   <!-- Header -->
   <header class="site-header">
     <div class="header-inner">
       <div class="brand">
         <span class="brand-badge"></span>
         <div class="brand-text">
-          <h1 class="brand-title">CANGFENG · 藏锋录</h1>
-          <span class="brand-subtitle">个人空间工造 · 视觉成果典藏</span>
+          <h1 class="brand-title">地图录 · AtlasLog</h1>
+          <span class="brand-subtitle">个人制图实践 · QGIS 能力边界的记录</span>
         </div>
       </div>
 
       <div class="header-meta">
+        <a href="https://github.com/OpenQGIS/QMapFlow" target="_blank" rel="noopener" class="stat-pill" title="《QMapFlow》制图方法与完整工作流沉淀" style="text-decoration: none; cursor: pointer;">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+          <span>工作流 · QMapFlow</span>
+          <svg class="icon" style="width:12px; height:12px; margin-left:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+        </a>
         <a href="https://github.com/OpenQGIS/Cabinet" target="_blank" rel="noopener" class="stat-pill" title="《珍奇柜 · 空间制图藏录》共享精选库" style="text-decoration: none; cursor: pointer;">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
           <span>珍奇柜 · Cabinet</span>
@@ -54,23 +59,27 @@
     </div>
   </header>
 
-  <!-- Opener Banner: 东方工造哲学题记 -->
-  <section class="cangfeng-hero-banner" style="max-width: 1600px; margin: 24px auto 0; padding: 28px 32px; background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
-    <div style="max-width: 820px;">
+  <!-- Opener Banner: 宣传体系（QMapFlow 深度融合版） -->
+  <section class="atlas-hero-banner cangfeng-hero-banner" style="max-width: 1600px; margin: 24px auto 0; padding: 28px 32px; background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;">
+    <div style="max-width: 860px;">
       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-        <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; background: rgba(var(--accent-rgb), 0.12); padding: 3px 8px; border-radius: 2px;">十年淬砺 · 霜刃入鞘</span>
-        <span style="font-size: 0.78rem; color: var(--text-muted);">个人空间工造 · 视觉成果专集</span>
+        <span style="font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; background: rgba(var(--accent-rgb), 0.12); padding: 3px 8px; border-radius: 2px;">一图一境 · 静观其详</span>
+        <span style="font-size: 0.78rem; color: var(--text-muted);">OpenQGIS 制图作品集 · 与 QMapFlow 共同探索 QGIS 的表达上限</span>
       </div>
-      <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary); letter-spacing: 0.05em; margin-bottom: 8px;">《藏锋录》· 空间肌理 · 激光纸雕 · 绿道剖面</h2>
-      <p style="font-size: 0.85rem; line-height: 1.65; color: var(--text-secondary); margin: 0;">
-        汇聚上海千万级空间矢量肌理、毫米级精密激光剪纸、锦江绿道黄龙溪段山水剖面及秩序版式成果。
-        采用“前端轻量开源 + 核心切片私有云挂载”架构，支持 1:1 4K 物理像素无损深览。
+      <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--text-primary); letter-spacing: 0.05em; margin-bottom: 8px;">《地图录》· AtlasLog · 个人制图实践，亦是 QGIS 能力边界的记录</h2>
+      <p style="font-size: 0.86rem; line-height: 1.7; color: var(--text-secondary); margin: 0;">
+        这里汇集多年来用 QGIS 亲手制作的地图作品。每一幅既是独立完成的视觉表达，也是对 QGIS 制图能力边界的探索与验证。<br/>
+        作品背后的完整工作流与方法沉淀，同步记录于 <strong>QMapFlow</strong>。采用 1:1 4K 物理像素无损深览。
       </p>
     </div>
-    <div style="display: flex; align-items: center; gap: 12px;">
+    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
       <a href="#galleryGrid" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; font-size: 0.82rem; font-weight: 600; color: var(--text-primary); background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); text-decoration: none;">
-        <span>浏览成果卷轴</span>
+        <span>浏览制图卷轴</span>
         <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+      </a>
+      <a href="https://github.com/OpenQGIS/QMapFlow" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; font-size: 0.82rem; font-weight: 600; color: var(--accent); background: var(--accent-subtle); border: 1px solid rgba(var(--accent-rgb), 0.3); border-radius: var(--radius-sm); text-decoration: none;">
+        <span>探索 QMapFlow 工作流</span>
+        <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
       </a>
     </div>
   </section>
@@ -204,10 +213,10 @@
   <footer class="site-footer" style="padding: 36px 28px; text-align: center; border-top: 1px solid var(--border-subtle); margin-top: 60px;">
     <div style="max-width: 800px; margin: 0 auto;">
       <p style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
-        《藏锋录 · 空间工造与视觉成果典藏》· Copyright © 2026 OpenQGIS / CangFeng
+        《地图录 · AtlasLog · OpenQGIS 制图作品集》· Copyright © 2026 OpenQGIS / Atlas
       </p>
       <p style="font-size: 0.76rem; color: var(--text-muted); line-height: 1.6;">
-        前端代码遵循 MIT License 开源 · 亿级像素瓦片金字塔由 Cloudflare 私有云基座托管挂载 · 严禁二次未经授权翻印商用
+        与 QMapFlow 共同探索 QGIS 的表达上限 · 前端代码遵循 MIT License 开源 · 亿级像素瓦片金字塔同源极速分发 · 严禁二次未经授权翻印商用
       </p>
     </div>
   </footer>

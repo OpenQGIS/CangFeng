@@ -2743,3 +2743,113 @@ img, canvas, .osd-stage, .gallery-card-thumb, .card-media {
   transform-origin: right center;
 }
 
+/* =====================================================================
+   Mobile Responsive Optimizations (针对手机移动端视口与手势优化)
+   ==================================================================== */
+@media (max-width: 768px) {
+  .viewer-container {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  /* 顶栏优化：紧凑排列，突出作品标题 */
+  .viewer-header {
+    height: 50px;
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .viewer-header-left {
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .viewer-title {
+    font-size: 0.88rem;
+    max-width: calc(100vw - 190px);
+  }
+
+  /* 手机端隐藏右侧冗余退出按钮，保留左侧主退出按钮 */
+  #btnCloseViewerRight {
+    display: none !important;
+  }
+
+  .viewer-header-right {
+    gap: 4px;
+  }
+
+  .viewer-header-right .nav-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .viewer-header-right .divider {
+    height: 16px;
+    margin: 0 2px;
+  }
+
+  /* 手机端隐藏左右侧边大翻页箭头，避免双指缩放拖拽误触与遮挡画幅 */
+  .viewer-edge-nav {
+    display: none !important;
+  }
+
+  /* 底部浮动工具栏移动端紧凑化 */
+  .viewer-float-toolbar,
+  .viewer-floating-toolbar {
+    bottom: 16px;
+    padding: 3px 6px;
+    gap: 2px;
+    max-width: calc(100vw - 24px);
+  }
+
+  .tool-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .tool-btn .icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .tool-zoom-badge {
+    font-size: 0.70rem;
+    padding: 2px 5px;
+    min-width: 38px;
+  }
+
+  .tool-btn-text {
+    font-size: 0.72rem;
+    padding: 0 5px;
+  }
+
+  /* 移动端浮动信息面板转为底部抽屉 */
+  .viewer-drawer,
+  .viewer-meta-drawer {
+    top: auto !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 75vh !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+    transform: translateY(100%);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6);
+  }
+
+  .viewer-drawer.open,
+  .viewer-meta-drawer.open {
+    transform: translateY(0) !important;
+    opacity: 0.95 !important;
+  }
+
+  /* 抽屉在手机端不响应桌面端自由缩放手柄 */
+  .drawer-resize-handle,
+  .drawer-resize-corner-hint {
+    display: none !important;
+  }
+}
+
+

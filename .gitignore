@@ -29,8 +29,8 @@ pic/
 *.psd
 *.ai
 
-# Tile Pyramids (Hosted on private Cloudflare CangFengCore hub)
-tiles/
+# Tile Pyramids (Built-in high-res WebP pyramids for direct GitHub Pages & offline delivery)
+# tiles/
 
 # Logs & Temp
 *.log
